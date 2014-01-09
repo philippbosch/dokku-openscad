@@ -1,0 +1,17 @@
+#!/bin/bash
+APP="$1"; IMAGE="app/$APP"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+set -e
+echo "-----> Injecting OpenSCAD ..."
+COMMAND=$(cat <<EOF
+apt-get update &&
+apt-get install -y software-properties-common &&
+add-apt-repository -y ppa:chrysn/openscad &&
+apt-get update && 
+apt-get install -y openscad
+EOF
+)
+id=$(docker run -d $IMAGE /bin/bash -c "$COMMAND")
+test $(docker wait $id) -eq 0
+docker commit $id $IMAGE > /dev/null
+echo "-----> Injected OpenSCAD"
